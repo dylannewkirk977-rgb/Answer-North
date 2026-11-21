@@ -12,7 +12,8 @@ __pycache__/
 # Node
 node_modules/
 
-# Generated media and model files (too large for git)
+# Source and generated media, model files (too large for git)
+**/input/
 **/output/
 **/renders/
 *.safetensors

@@ -2,7 +2,7 @@
 # Model names and endpoints live here (not in code) so they can move between GPUs.
 
 # Where results go. Relative paths are relative to this folder.
-# Later this can point at the big F: drive, e.g. "F:/korvellan-output".
+# Never point this at the F: drive.
 output_dir: output
 
 transcribe:

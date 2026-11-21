@@ -14,10 +14,18 @@ uv sync
 
 This installs everything into `.venv`, including NVIDIA's GPU libraries (~2 GB). ffmpeg must be on PATH (`winget install Gyan.FFmpeg`).
 
+## Getting test videos
+
+Put source videos in `input/` (not committed). Only use footage you have rights to: Creative Commons, your own, or a client's.
+
+```powershell
+yt-dlp -f "bv*[height<=1080]+ba/b" --merge-output-format mp4 -o "input\%(title)s.%(ext)s" "https://www.youtube.com/watch?v=VIDEO_ID"
+```
+
 ## Usage
 
 ```powershell
-uv run korvellan-video transcribe "path\to\video.mp4"
+uv run korvellan-video transcribe "input\video.mp4"
 ```
 
 Writes `output/<video name>/transcript.json` with word-level timestamps. The first run downloads the Whisper model (~1.6 GB for `large-v3-turbo`).

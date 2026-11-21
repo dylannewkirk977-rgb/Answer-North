@@ -6,6 +6,7 @@ Korvellan Studios builds AI-powered services and business automation. This repo 
 - Work in small steps; explain important decisions briefly.
 - Prefer simple, sellable solutions over clever complexity.
 - **Ask before:** installing software, major architecture changes, or destructive commands (deleting files, rewriting git history, etc.).
+- **Never create files or folders on the F: drive.** Don't suggest F: paths in code, config, or docs.
 - Update [docs/PROGRESS.md](docs/PROGRESS.md) when a step is finished.
 
 ## Conventions

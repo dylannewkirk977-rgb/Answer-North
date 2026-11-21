@@ -10,7 +10,7 @@
 | GPU 2 | Radeon AI PRO R9700, 32 GB | Large language models (**not installed yet**) |
 | C: | NVMe, ~1.5 TB free | OS, tools, active projects |
 | D: | NVMe, ~0.9 TB free | Model weights |
-| F: | HDD pool, ~7.4 TB free | Finished video and media archive |
+| F: | HDD pool, ~7.4 TB free | **Off limits: tools never write here** |
 
 **Why split the GPUs this way:** language models need a lot of memory, and the R9700's 32 GB fits much bigger models. Image, video, and audio tools are mostly built for NVIDIA, so they go on the 5070. Each card does its own job without competing for memory.
 
@@ -25,6 +25,7 @@
 | Node 26, git, VS Code | Installed |
 | opencode | Configured for local Ollama (`opencode.json`) |
 | ffmpeg 9.1 | Installed (winget). GPU encoding via NVENC on the 5070 |
+| yt-dlp | Installed (`uv tool install yt-dlp`); update with `uv tool upgrade yt-dlp` |
 | Docker / WSL | Not installed (not needed yet) |
 
 ## Video pipeline (`video-pipeline/`)

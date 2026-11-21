@@ -13,6 +13,8 @@ Local AI environment, then an automated video production pipeline.
 - **2026-11-21**: Agreed on the video pipeline design: one `video-pipeline/` project, shared stages, Clipper recipe first (see [ARCHITECTURE.md](ARCHITECTURE.md)).
 - **2026-11-21**: Created `video-pipeline/` with the **transcribe** stage: faster-whisper on the RTX 5070 (~30× real time), word-level timestamps → `transcript.json`. Tested end-to-end on a generated test video.
 
+- **2026-11-21**: Installed yt-dlp for test footage; added `video-pipeline/input/` (gitignored) for source videos.
+
 ## Next
 1. Run transcription on a real long video (the user is downloading one).
 2. Moment picker: the local LLM reads the transcript and picks the best 30–60 s clips.
