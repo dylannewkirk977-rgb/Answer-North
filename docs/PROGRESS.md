@@ -22,6 +22,10 @@ Video pipeline: the **Clipper** (long video → captioned vertical clips) works 
 - **2026-11-21**: Transcription is now **fully offline** (loads the Whisper model locally, never contacts Hugging Face unless the model is missing).
 - **2026-11-21**: Added **`auto` layout** (new default): YuNet face detection on 15 frames per video picks `split` (face cam on top, gameplay below), `crop` (centered on one person), or `blur` (groups / no face). Verified: gaming video → split, Matan group video → blur. Installed `opencv-python-headless`.
 
+- **2026-11-21**: Rebuilt **prospect-finder** with two commands:
+  - `creators` (new): finds YouTube creators posting long videos with few/no Shorts → `data/creator_prospects.csv`. Tested: "business podcast" → 12 creators, 4 HIGH, in 24 s.
+  - `search` (fixed): industry now actually filters (OSM tag presets + name match), any capitalization works (geocoded), searches a radius around the city, flags businesses with no website. **Not yet verified:** the free OpenStreetMap servers were overloaded during testing.
+
 ## Feedback so far
 - Test video: timestamps were decent, but the source itself is low-energy. Need a livelier Creative Commons podcast/interview.
 - No caption censoring for now (user's call).
@@ -37,7 +41,4 @@ Video pipeline: the **Clipper** (long video → captioned vertical clips) works 
 - **Radeon AI PRO R9700**: needs an 8-pin adapter for clearance before install. After install: AMD driver, verify detection, move LLM work onto it.
 
 ## Known issues
-- **prospect-finder**:
-  - `--industry` is not used in the search query, so it returns all shops in the city.
-  - The city match is exact and case-sensitive ("STILLWATER" won't match "Stillwater").
-  - `fetch_location()` is defined but never called.
+- **prospect-finder `search`**: depends on free public OpenStreetMap servers, which were overloaded on 2026-11-21 (untested end-to-end). OSM data is also incomplete for small businesses. A paid source (e.g. Google Places API) would be far more reliable if local leads become important.

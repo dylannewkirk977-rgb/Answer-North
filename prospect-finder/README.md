@@ -1,26 +1,13 @@
 # Prospect Finder
 
-A command-line sales prospecting tool for Korvellan Studios: find local businesses to pitch on our services.
+Sales lead lists for Korvellan Studios:
 
-## Features
+- **`creators`**: YouTube creators who'd benefit from the Clipper (long videos, few Shorts)
+- **`search`**: local businesses (for websites, promo videos, AI receptionists)
 
-### Implemented
-
-- **Search local businesses** using OpenStreetMap's Overpass API
-  - Search by city and industry (plumbers, HVAC, electricians, contractors)
-  - Shows business name, address, phone number, and website
-  - Saves results to a CSV file, skipping duplicates
-  - Handles API rate limits, timeouts, and failures
-- **Command-line interface** for running searches
-
-### Coming soon
-
-- **Organize contact information** from public business listings, websites, and directories
-- **AI-assisted outreach**: personalized outreach scripts and email templates per prospect
+Results are saved as CSV in `data/` (not committed) and can be opened in Excel or Google Sheets. Re-running adds only new entries.
 
 ## Setup
-
-This project uses [uv](https://docs.astral.sh/uv/) to manage Python.
 
 ```powershell
 cd prospect-finder
@@ -28,35 +15,37 @@ uv venv
 uv pip install -r requirements.txt
 ```
 
-## Usage
+## Find creators to pitch the Clipper
 
 ```powershell
-uv run main.py search --city "STILLWATER" --industry plumber
-uv run main.py search --city "MINNEAPOLIS" --industry hvac
+uv run main.py creators --niche "business podcast"
+uv run main.py creators --niche "true crime podcast" --min-subs 10000 --max-subs 200000
 ```
 
-Options:
-- `--city`: city to search in
-- `--industry`: industry type (plumber, hvac, electrician, contractor, etc.)
-- `-l` or `--limit`: maximum number of results (default: 20)
+Searches YouTube, keeps channels posting long videos (20+ min) in the subscriber range, then checks each channel's last 15 uploads (public RSS feed) for activity and Shorts.
 
-Results are shown on screen and saved to `data/prospects.csv`.
+| `clip_opportunity` | Meaning |
+|---|---|
+| **HIGH** | 2+ long videos in the last 30 days and **no Shorts**: no clipper yet |
+| **MEDIUM** | Posting long videos, only a few Shorts |
+| **LOW** | Already posts lots of Shorts (probably has a clipper) |
 
-## Project structure
+Columns include subscribers, long videos / Shorts in 30 days, average video length, average views, days since last upload, any email found in the channel description, and the channel link. Options: `--min-subs`, `--max-subs`, `--min-minutes`, `-l/--limit`, `--search` (how many results to scan). ~25 s per run.
 
-- `main.py`: entry point and search logic
-- `requirements.txt`: Python dependencies
-- `.gitignore`: keeps secrets and generated data out of git
-- `data/`: prospect CSV exports (not committed)
+Review the list by hand: search results include some poor fits (e.g. corporate channels).
+
+## Find local businesses
+
+```powershell
+uv run main.py search --city "Stillwater, MN" --industry plumber
+uv run main.py search --city "Minneapolis, MN" --industry dentist --radius-km 10
+```
+
+Industries with presets: plumber, hvac, electrician, contractor, roofer, landscaper, painter, dentist, salon, auto_repair, lawyer, real_estate. Any other word searches business names.
+
+Shows name, phone, email, website, and address. Businesses with **no website** are flagged: they're website leads. Data comes from OpenStreetMap (free), which is incomplete for small businesses. The free OpenStreetMap servers are often overloaded; the tool tries three of them and retries once, and if all are busy, try again later.
 
 ## Security notes
 
 - Never commit `.env` files containing API keys or credentials
-- Generated prospect data is excluded from version control
-
-## Roadmap
-
-- Integration with public business directories
-- AI-generated outreach content
-- CRM integration for follow-up tracking
-- Reporting and analytics dashboard
+- Generated prospect data (`data/*.csv`) is excluded from version control
