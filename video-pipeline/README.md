@@ -36,6 +36,13 @@ uv run korvellan-video pick "input\video.mp4"          # or -n 5 for top 5
 
 The local AI (Ollama) reads the transcript and writes `output/<video name>/clips.json`: the best 20–60 s moments, ranked, with title, hook, and reason. Needs the Ollama app running. Takes ~2.5 min for a 48-min video.
 
+```powershell
+uv run korvellan-video render "input\video.mp4"                  # all picked clips
+uv run korvellan-video render "input\video.mp4" --only 1,3 --layout crop
+```
+
+Cuts each pick into a 1080×1920 MP4 in `output/<video name>/clips/`, encoded on the RTX 5070 (~10 s per clip). Layouts: `blur` (full frame over a blurred background; keeps face cams and HUD, the default) or `crop` (center slice; fills the screen, cuts the sides).
+
 How picking works: the transcript is read in 5-minute overlapping chunks, and the AI suggests up to 3 clips per chunk. Code snaps them to whole sentences, enforces length limits, and removes duplicates. A final pass shows the AI all candidates together and it chooses the top N in order. Tune it in the `clipper:` section of `config.yaml` (add `style_notes` to describe a channel).
 
 Settings (models, GPU, output folder) are in [config.yaml](config.yaml). Use `--config other.yaml` to try different settings.
@@ -52,6 +59,7 @@ src/korvellan_video/
   llm.py                  Ollama client (JSON replies)
   stages/transcribe.py    Whisper transcription
   stages/pick_moments.py  AI clip picking
+  stages/render.py        cut + 9:16 layout + GPU encode
 output/                   results (not committed)
 ```
 

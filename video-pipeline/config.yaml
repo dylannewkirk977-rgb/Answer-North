@@ -30,3 +30,9 @@ clipper:
   rank_with_thinking: true  # let the AI reason during the final ranking (one request, worth it)
   # Optional: tell the AI about the content/channel and what makes a good clip.
   style_notes: ""
+
+render:
+  layout: blur            # "blur" = full frame on blurred background (gaming), "crop" = fill screen (talking head)
+  video_encoder: h264_nvenc  # RTX 5070 hardware encoder; "libx264" = CPU fallback
+  quality: 23             # lower = better quality, bigger files (18-26 is sensible)
+  max_mbps: 10            # bitrate cap; Shorts/TikTok/Reels don't benefit from more

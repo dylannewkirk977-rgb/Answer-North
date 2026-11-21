@@ -38,6 +38,11 @@ def main() -> int:
     p.add_argument("source", type=Path, help="The video (already transcribed) or its transcript.json")
     p.add_argument("-n", "--max-clips", type=int, help="How many clips to keep (default: from config)")
 
+    p = sub.add_parser("render", help="Cut the picked clips into vertical 9:16 MP4s")
+    p.add_argument("source", type=Path, help="The original video (already transcribed and picked)")
+    p.add_argument("--layout", choices=["crop", "blur"], help="crop = fill screen, blur = full frame on blurred bg")
+    p.add_argument("--only", help="Only these clip ranks, e.g. 1,3,5")
+
     args = parser.parse_args()
     cfg = load_config(args.config)
 
@@ -48,6 +53,13 @@ def main() -> int:
         elif args.command == "pick":
             from .stages.pick_moments import pick_moments
             pick_moments(transcript_for(args.source, cfg), cfg, args.max_clips)
+        elif args.command == "render":
+            from .stages.render import render
+            clips_path = cfg["output_dir"] / args.source.stem / "clips.json"
+            if not clips_path.exists():
+                raise FileNotFoundError(f"{clips_path}\n(Run `korvellan-video pick` on the video first.)")
+            only = [int(x) for x in args.only.split(",")] if args.only else None
+            render(args.source, clips_path, cfg, args.layout, only)
     except FileNotFoundError as e:
         print(f"Error: file not found: {e.filename or e}", file=sys.stderr)
         return 1

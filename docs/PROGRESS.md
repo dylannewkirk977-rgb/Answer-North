@@ -18,11 +18,15 @@ Local AI environment, then an automated video production pipeline.
 - **2026-11-21**: Transcribed a real 48-min gaming video: 92% avg word confidence, ~3 min.
 - **2026-11-21**: Built the **pick** stage: local LLM (qwen3.5:9b) picks and ranks the top 10 clips (20–60 s) → `clips.json`. ~2.5 min for a 48-min video.
 
+- **2026-11-21**: Built the **render** stage: picks → 1080×1920 MP4s on NVENC (~10 s/clip, ~10 Mbps). Layouts: `blur` and `crop`. Rendered all 10 test clips.
+- **Feedback on the test video:** timestamps were decent, but the source itself is low-energy. Need a livelier Creative Commons podcast/interview for the next test.
+
 ## Next
-1. Render stage: cut each clip, crop to 9:16, encode on the GPU → vertical MP4s.
-2. Captions: burned-in, word-by-word, from the word timestamps.
-3. `clipper` recipe: one command runs transcribe → pick → render.
-4. Later: loudness detection to catch non-verbal moments (screams, big plays) in gaming content.
+1. Captions: burned-in, word-by-word, from the word timestamps.
+2. `clipper` recipe: one command runs transcribe → pick → render.
+3. Test on a livelier Creative Commons podcast/interview.
+4. Later: `split` layout (face cam on top, gameplay below) for streamer content.
+5. Later: loudness detection to catch non-verbal moments (screams, big plays) in gaming content.
 
 ## Waiting on
 - **Radeon AI PRO R9700**: needs an 8-pin adapter for clearance before install. After install: AMD driver, verify detection, move LLM work onto it.

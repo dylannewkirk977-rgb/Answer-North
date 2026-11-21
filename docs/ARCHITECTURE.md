@@ -39,8 +39,8 @@ One Python project with reusable **stages**, chained into **recipes**:
 |---|---|---|---|
 | Transcribe | faster-whisper (`large-v3-turbo`) | RTX 5070 | ✅ Done |
 | Pick moments | Ollama `qwen3.5:9b` | 5070 now, R9700 later | ✅ Done |
-| Cut / crop / render | ffmpeg (NVENC) | RTX 5070 | Next |
-| Captions | From word timestamps | ffmpeg | Planned |
+| Cut / crop / render | ffmpeg (NVENC) | RTX 5070 | ✅ Done |
+| Captions | From word timestamps | ffmpeg | Next |
 
 ## Design rules
 - **One folder per service**, each with its own dependencies.
