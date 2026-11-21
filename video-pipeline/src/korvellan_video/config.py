@@ -12,6 +12,7 @@ def load_config(path: Path | None = None) -> dict:
     with open(path, encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
 
-    out = Path(cfg.get("output_dir", "output"))
-    cfg["output_dir"] = out if out.is_absolute() else PROJECT_DIR / out
+    for key, default in (("input_dir", "input"), ("output_dir", "output")):
+        p = Path(cfg.get(key, default))
+        cfg[key] = p if p.is_absolute() else PROJECT_DIR / p
     return cfg

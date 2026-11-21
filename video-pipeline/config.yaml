@@ -1,9 +1,13 @@
 # Korvellan Studios video pipeline settings.
 # Model names and endpoints live here (not in code) so they can move between GPUs.
 
-# Where results go. Relative paths are relative to this folder.
-# Never point this at the F: drive.
-output_dir: output
+# Folders. Relative paths are relative to this folder.
+# Never point these at the F: drive.
+input_dir: input          # downloaded / source videos
+output_dir: output        # transcripts, picks, rendered clips
+
+download:
+  max_height: 1080        # 1080p is plenty for vertical clips
 
 transcribe:
   model: large-v3-turbo   # Whisper model. "small" is faster but less accurate.

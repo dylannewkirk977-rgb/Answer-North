@@ -31,6 +31,18 @@ def main() -> int:
     parser.add_argument("--config", type=Path, help="Path to config.yaml (default: the project's)")
     sub = parser.add_subparsers(dest="command", required=True)
 
+    p = sub.add_parser("clipper", help="Everything in one go: (download) -> transcribe -> pick -> render")
+    p.add_argument("source", help="A YouTube/web link, or a video file")
+    p.add_argument("-n", "--max-clips", type=int, help="How many clips (default: from config)")
+    p.add_argument("--layout", choices=["crop", "blur"], help="crop = fill screen, blur = full frame on blurred bg")
+    p.add_argument("--captions", action=argparse.BooleanOptionalAction, default=None,
+                   help="Burn in captions (default: from config). Use --no-captions to skip.")
+    p.add_argument("--redo", action="append", choices=["transcribe", "pick"], default=[],
+                   help="Re-run a finished step instead of reusing it (repeatable)")
+
+    p = sub.add_parser("download", help="Download a video (e.g. YouTube) into the input folder")
+    p.add_argument("url", help="Video link")
+
     p = sub.add_parser("transcribe", help="Transcribe a video/audio file with word timestamps")
     p.add_argument("source", type=Path, help="Video or audio file")
 
@@ -49,7 +61,13 @@ def main() -> int:
     cfg = load_config(args.config)
 
     try:
-        if args.command == "transcribe":
+        if args.command == "clipper":
+            from .recipes.clipper import clipper
+            clipper(args.source, cfg, args.max_clips, args.layout, args.captions, set(args.redo))
+        elif args.command == "download":
+            from .stages.download import download
+            download(args.url, cfg)
+        elif args.command == "transcribe":
             from .stages.transcribe import transcribe
             transcribe(args.source, cfg)
         elif args.command == "pick":
@@ -68,4 +86,7 @@ def main() -> int:
     except RuntimeError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
+    except KeyboardInterrupt:
+        print("\nStopped.", file=sys.stderr)
+        return 130
     return 0
