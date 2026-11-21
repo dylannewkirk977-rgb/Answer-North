@@ -26,6 +26,8 @@ Video pipeline: the **Clipper** (long video → captioned vertical clips) works 
   - `creators` (new): finds YouTube creators posting long videos with few/no Shorts → `data/creator_prospects.csv`. Tested: "business podcast" → 12 creators, 4 HIGH, in 24 s.
   - `search` (fixed): industry now actually filters (OSM tag presets + name match), any capitalization works (geocoded), searches a radius around the city, flags businesses with no website. **Not yet verified:** the free OpenStreetMap servers were overloaded during testing.
 
+- **2026-11-21**: Local search now covers the **Twin Cities metro** (7 counties, default) or specific cities, and runs on a **local copy of Minnesota's OpenStreetMap data** (`update-map`; 41k businesses indexed, searches in <1 s, offline). The public OSM servers were at capacity all day, so this replaced them. Installed `osmium`. Coverage: thin for trades (29 plumbers metro-wide), good for storefronts (303 dentists, 867 salons).
+
 ## Feedback so far
 - Test video: timestamps were decent, but the source itself is low-energy. Need a livelier Creative Commons podcast/interview.
 - No caption censoring for now (user's call).
@@ -44,4 +46,4 @@ Video pipeline: the **Clipper** (long video → captioned vertical clips) works 
   3. **Build the agent console** (`console/`, approved for after the install): chat in plain English, local LLM calls the existing tools (creators, search, download, clipper, open folder, outreach drafts). Phases: terminal chat → background jobs + progress → local web UI with clip previews. Tools allowlisted, no deletes, F: blocked in code, confirm before long jobs.
 
 ## Known issues
-- **prospect-finder `search`**: depends on free public OpenStreetMap servers, which were overloaded on 2026-11-21 (untested end-to-end). OSM data is also incomplete for small businesses. A paid source (e.g. Google Places API) would be far more reliable if local leads become important.
+- **prospect-finder `search`**: OpenStreetMap is incomplete for trades (e.g. only 29 plumbers in the metro) and "no website" often means "not listed". If trade leads matter, consider Google Places API (paid). The `twin-cities` region is a rectangle, so it includes a few towns just outside the 7 counties (e.g. Big Lake, Buffalo, Monticello).

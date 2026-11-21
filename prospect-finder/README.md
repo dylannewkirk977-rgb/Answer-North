@@ -36,6 +36,14 @@ Review the list by hand: search results include some poor fits (e.g. corporate c
 
 ## Find local businesses
 
+Searches a **local copy of Minnesota's OpenStreetMap data**: no internet needed, results in under a second. First time (and about once a month to refresh):
+
+```powershell
+uv run main.py update-map        # downloads ~290 MB to osm/ and builds the index (~2 min)
+```
+
+Then:
+
 ```powershell
 uv run main.py search --industry plumber                     # whole Twin Cities metro (default)
 uv run main.py search --industry dentist --city "Minneapolis, MN" --city "St Paul, MN"
@@ -45,7 +53,11 @@ By default it searches the **Minneapolis–St. Paul metro** (7 counties: Hennepi
 
 Industries with presets: plumber, hvac, electrician, contractor, roofer, landscaper, painter, dentist, salon, auto_repair, lawyer, real_estate. Any other word searches business names.
 
-Shows name, phone, email, website, and address. Businesses with **no website** are flagged: they're website leads. Data comes from OpenStreetMap (free), which is incomplete for small businesses. The free OpenStreetMap servers are often overloaded; the tool tries three of them and retries once, and if all are busy, try again later.
+City names work in any form ("St Paul", "st. paul, minnesota"); typos get suggestions. Businesses without a city in their address get the nearest town, shown with `~` (e.g. `~Edina`).
+
+Shows name, city, phone, website, and address. "NO WEBSITE" means **none is listed in the map data**, not that the business has none: check before pitching a website.
+
+**Coverage (Twin Cities metro, map data of 2026-11-21):** plumbers 29, HVAC 35, electricians 25, roofers 30, contractors 61, lawyers 98, real estate 94, dentists 303, auto repair 469, salons 867. Trades are thinly covered; storefront businesses much better. About 40–80% have a phone number, depending on industry.
 
 ## Security notes
 

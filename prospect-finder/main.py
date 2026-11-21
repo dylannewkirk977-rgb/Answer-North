@@ -1,8 +1,9 @@
 """Korvellan Studios Prospect Finder - find local businesses and YouTube creators to pitch.
 
 Commands:
-  search    local businesses (OpenStreetMap) -> data/local_prospects.csv
-  creators  YouTube creators for the Clipper   -> data/creator_prospects.csv
+  search      local businesses (local OpenStreetMap data) -> data/local_prospects.csv
+  update-map  download/refresh the Minnesota map data (monthly)
+  creators    YouTube creators for the Clipper            -> data/creator_prospects.csv
 """
 import argparse
 import csv
@@ -15,15 +16,10 @@ from pathlib import Path
 
 import requests
 
-USER_AGENT = "KorvellanStudiosProspectFinder/1.1"
+import osm_local
+
+USER_AGENT = "KorvellanStudiosProspectFinder/1.2"
 DATA_DIR = Path(__file__).parent / "data"
-NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
-# Free public OpenStreetMap query servers; they're often busy, so we try several.
-OVERPASS_SERVERS = [
-    "https://overpass-api.de/api/interpreter",
-    "https://overpass.private.coffee/api/interpreter",
-    "https://overpass.kumi.systems/api/interpreter",
-]
 EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 
 # Industry -> OpenStreetMap tags, plus a name pattern to catch businesses tagged loosely.
@@ -81,57 +77,8 @@ def save_rows(path: Path, rows: list[dict], key: str) -> tuple[int, int]:
 
 # ----------------------------------------------------------------- local businesses
 
-def geocode(place: str) -> dict:
-    """Look up a city with Nominatim (any capitalization works)."""
-    r = get(NOMINATIM_URL, params={"q": place, "format": "json", "limit": 1})
-    r.raise_for_status()
-    data = r.json()
-    if not data:
-        raise ValueError(f"Couldn't find '{place}'. Try adding the state, e.g. \"Stillwater, MN\".")
-    return {"name": data[0]["display_name"], "lat": float(data[0]["lat"]), "lon": float(data[0]["lon"])}
-
-
-def overpass_query(industry: str, areas: list[str]) -> str:
-    """areas: Overpass location filters, e.g. "(around:15000,44.97,-93.26)" or a bbox "(s,w,n,e)"."""
-    spec = INDUSTRIES.get(industry, {"tags": [], "name": re.escape(industry)})
-    parts = []
-    for area in areas:
-        parts += [f'nwr["{k}"="{v}"]{area};' for k, v in spec["tags"]]
-        parts.append(f'nwr["name"~"{spec["name"]}",i]{area};')
-    return f"[out:json][timeout:180];({''.join(parts)});out center tags;"
-
-
-def run_overpass(query: str, rounds: int = 1) -> list[dict]:
-    """Try each public server in turn; busy/timeouts move on to the next one."""
-    for rnd in range(rounds):
-        for url in OVERPASS_SERVERS:
-            host = url.split("/")[2]
-            try:
-                # (connect timeout, read timeout): fail fast if a server is down,
-                # but give a working server time to run a metro-wide query.
-                r = requests.post(url, data={"data": query}, headers={"User-Agent": USER_AGENT},
-                                  timeout=(10, 180))
-            except requests.RequestException as e:
-                print(f"  {host}: no response ({type(e).__name__}), trying next server...")
-                continue
-            if r.status_code in (429, 502, 503, 504):
-                print(f"  {host}: busy ({r.status_code}), trying next server...")
-                continue
-            if r.status_code != 200:
-                print(f"  {host}: error {r.status_code}, trying next server...")
-                continue
-            try:
-                return r.json().get("elements", [])
-            except ValueError:
-                print(f"  {host}: bad reply, trying next server...")
-        if rnd + 1 < rounds:
-            print("  All map servers busy; waiting 30s and trying again...")
-            time.sleep(30)
-    raise RuntimeError("All free OpenStreetMap servers are busy right now. Try again in a few minutes.")
-
-
 def to_business(el: dict, industry: str, area: str) -> dict | None:
-    tags = el.get("tags", {})
+    tags = el["tags"]
     name = tags.get("name", "").strip()
     if len(name) < 2 or not any(k in tags for k in BUSINESS_KEYS):
         return None
@@ -141,7 +88,6 @@ def to_business(el: dict, industry: str, area: str) -> dict | None:
     website = tags.get("website") or tags.get("contact:website") or tags.get("url") or ""
     if website and not website.startswith(("http://", "https://")):
         website = "https://" + website
-    center = el.get("center", el)
     return {
         "found_at": datetime.now().strftime("%Y-%m-%d"),
         "industry": industry,
@@ -150,12 +96,13 @@ def to_business(el: dict, industry: str, area: str) -> dict | None:
         "email": tags.get("email") or tags.get("contact:email") or "",
         "website": website,
         "has_website": "yes" if website else "NO",
-        "city": tags.get("addr:city", ""),
+        # City from the address; if missing, the nearest town (marked with ~).
+        "city": tags.get("addr:city") or f"~{osm_local.nearest_town(el['lat'], el['lon'])}",
         "address": address,
         "searched_area": area,
-        "lat": center.get("lat", ""),
-        "lon": center.get("lon", ""),
-        "osm_id": f"{el['type']}/{el['id']}",
+        "lat": round(el["lat"], 6),
+        "lon": round(el["lon"], 6),
+        "osm_id": el["osm_id"],
     }
 
 
@@ -165,25 +112,25 @@ def cmd_search(args) -> int:
         print(f"Note: '{industry}' isn't a preset; searching business names for it. "
               f"Presets: {', '.join(INDUSTRIES)}")
 
+    spec = INDUSTRIES.get(industry, {"tags": [], "name": re.escape(industry)})
+    info = osm_local.map_info()
+    print(f"Using local map data from {info.get('map_file_date')} "
+          f"({int(info.get('businesses', 0)):,} Minnesota businesses)")
+
     if args.city:  # specific cities, each with a radius
-        areas, labels = [], []
+        circles, labels = [], []
         for city in args.city:
-            print(f"Looking up {city}...")
-            place = geocode(city)
-            print(f"  -> {place['name']}")
-            areas.append(f"(around:{args.radius_km * 1000},{place['lat']},{place['lon']})")
-            labels.append(city)
-            time.sleep(1)  # Nominatim's usage policy: max 1 request per second
+            place = osm_local.find_place(city)
+            circles.append((place["lat"], place["lon"], args.radius_km))
+            labels.append(place["name"])
         area_label = " + ".join(labels)
         print(f"Searching for {industry} within {args.radius_km} km of {area_label}...")
+        elements = osm_local.search(spec, circles=circles)
     else:  # a whole region
         region = REGIONS[args.region]
-        s, w, n, e = region["bbox"]
-        areas = [f"({s},{w},{n},{e})"]
         area_label = region["label"]
         print(f"Searching for {industry} across {area_label}...")
-
-    elements = run_overpass(overpass_query(industry, areas))
+        elements = osm_local.search(spec, bbox=region["bbox"])
 
     seen, results = set(), []
     for el in elements:
@@ -195,7 +142,7 @@ def cmd_search(args) -> int:
             continue
         seen.add(dupe_key)
         results.append(b)
-    results.sort(key=lambda b: (b["city"] or "~", b["name"].lower()))  # by city; unknown city last
+    results.sort(key=lambda b: (b["city"].lstrip("~").lower(), b["name"].lower()))
     results = results[: args.limit]
 
     if not results:
@@ -215,6 +162,17 @@ def cmd_search(args) -> int:
     out = DATA_DIR / "local_prospects.csv"
     new, skipped = save_rows(out, results, "osm_id")
     print(f"\nSaved {new} new to {out}" + (f" ({skipped} already in the list)" if skipped else ""))
+    return 0
+
+
+def cmd_update_map(args) -> int:
+    pbf = osm_local.OSM_DIR / "minnesota-latest.osm.pbf"
+    if not args.skip_download:
+        pbf = osm_local.download_map(USER_AGENT)
+    elif not pbf.exists():
+        raise RuntimeError(f"No map file at {pbf}; run without --skip-download.")
+    osm_local.build_index(pbf)
+    print("Map data ready. Refresh about once a month with: uv run main.py update-map")
     return 0
 
 
@@ -356,6 +314,9 @@ def main() -> int:
     p.add_argument("-l", "--limit", type=int, default=1000, help="Max results (default 1000)")
     p.add_argument("--show-all", action="store_true", help="Print every result, not just the first 40")
 
+    p = sub.add_parser("update-map", help="Download the latest Minnesota map data and rebuild the index")
+    p.add_argument("--skip-download", action="store_true", help="Only rebuild the index from the existing file")
+
     p = sub.add_parser("creators", help="Find YouTube creators who'd benefit from clipping")
     p.add_argument("--niche", required=True, help='What to search, e.g. "business podcast"')
     p.add_argument("--min-subs", type=int, default=5_000)
@@ -367,7 +328,11 @@ def main() -> int:
     args = parser.parse_args()
     print("=" * 60 + "\n   Korvellan Studios Prospect Finder\n" + "=" * 60)
     try:
-        return cmd_search(args) if args.command == "search" else cmd_creators(args)
+        if args.command == "search":
+            return cmd_search(args)
+        if args.command == "update-map":
+            return cmd_update_map(args)
+        return cmd_creators(args)
     except (ValueError, RuntimeError, requests.RequestException) as e:
         print(f"\nError: {e}", file=sys.stderr)
         return 1

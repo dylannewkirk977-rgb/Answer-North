@@ -9,3 +9,6 @@ data/*.csv
 prospect_data/
 exports/
 temp_leads/
+
+# Local OpenStreetMap data (large, re-downloadable)
+osm/

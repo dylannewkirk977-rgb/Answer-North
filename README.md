@@ -6,7 +6,7 @@ AI-powered services and business automation, built on local AI infrastructure.
 
 | Folder | What it is | Status |
 |---|---|---|
-| [prospect-finder/](prospect-finder/) | Lead lists: YouTube creators (for the Clipper) and local businesses | Creators working; local search unverified |
+| [prospect-finder/](prospect-finder/) | Lead lists: YouTube creators (for the Clipper) and local businesses | Creators + Twin Cities local search working |
 | [website/](website/) | Korvellan Studios website (Vite + TypeScript) | Starter template |
 | [video-pipeline/](video-pipeline/) | Automated video production (Clipper, then Faceless) | Clipper working end-to-end |
 
