@@ -18,6 +18,10 @@ Video pipeline: the **Clipper** (long video → captioned vertical clips) works 
 - **2026-11-21**: Built **captions**: word-by-word, spoken word highlighted yellow, burned in during render. Font size 100, max 16 chars per caption.
 - **2026-11-21**: Built **`clipper`** (one command: link or file → download → transcribe → pick → render, reusing finished steps) and **`download`** (yt-dlp into `input/`). Tested end-to-end from a YouTube link: all 10 captioned clips in 1m 39s.
 
+- **2026-11-21**: User ran the full `clipper` on a 40-min Matan Even video: 9 captioned clips (private test only; not rights-cleared for posting).
+- **2026-11-21**: Transcription is now **fully offline** (loads the Whisper model locally, never contacts Hugging Face unless the model is missing).
+- **2026-11-21**: Added **`auto` layout** (new default): YuNet face detection on 15 frames per video picks `split` (face cam on top, gameplay below), `crop` (centered on one person), or `blur` (groups / no face). Verified: gaming video → split, Matan group video → blur. Installed `opencv-python-headless`.
+
 ## Feedback so far
 - Test video: timestamps were decent, but the source itself is low-energy. Need a livelier Creative Commons podcast/interview.
 - No caption censoring for now (user's call).
@@ -25,7 +29,7 @@ Video pipeline: the **Clipper** (long video → captioned vertical clips) works 
 ## Next
 1. Test on a livelier Creative Commons podcast/interview.
 2. Consider installing deno: yt-dlp warns that YouTube extraction without a JavaScript runtime is deprecated.
-3. Later: `split` layout (face cam on top, gameplay below) for streamer content.
+3. Later: speaker-following crop for group shows (crop onto whoever is talking).
 4. Later: loudness detection to catch non-verbal moments (screams, big plays) in gaming content.
 5. Later: optional caption censoring.
 

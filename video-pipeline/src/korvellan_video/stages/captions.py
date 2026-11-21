@@ -79,8 +79,16 @@ def group_words(words: list[dict], max_words: int, max_chars: int, max_gap: floa
     return groups
 
 
+def margin_for(ccfg: dict, layout: str) -> int:
+    """Caption distance from the bottom edge; can be set per layout in config."""
+    m = ccfg.get("margin_bottom", 470)
+    if isinstance(m, dict):
+        return int(m.get(layout, m.get("blur", 470)))
+    return int(m)
+
+
 def build_ass(segments: list[dict], clip_start: float, clip_end: float, out_path: Path,
-              ccfg: dict, width: int = 1080, height: int = 1920) -> int:
+              ccfg: dict, width: int = 1080, height: int = 1920, layout: str = "blur") -> int:
     """Write the .ass file for one clip. Returns the number of caption groups."""
     duration = clip_end - clip_start
     words = clip_words(segments, clip_start, clip_end)
@@ -89,7 +97,7 @@ def build_ass(segments: list[dict], clip_start: float, clip_end: float, out_path
 
     lines = [HEADER.format(
         w=width, h=height, font=ccfg.get("font", "Arial Black"), size=int(ccfg.get("font_size", 84)),
-        outline=int(ccfg.get("outline", 7)), margin_v=int(ccfg.get("margin_bottom", 470)),
+        outline=int(ccfg.get("outline", 7)), margin_v=margin_for(ccfg, layout),
     )]
     for gi, group in enumerate(groups):
         next_start = groups[gi + 1][0]["start"] if gi + 1 < len(groups) else duration

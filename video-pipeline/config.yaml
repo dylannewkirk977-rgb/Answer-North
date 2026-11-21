@@ -36,7 +36,12 @@ clipper:
   style_notes: ""
 
 render:
-  layout: blur            # "blur" = full frame on blurred background (gaming), "crop" = fill screen (talking head)
+  # auto  = decide per video: split if a face cam is found, crop for one person on camera, else blur
+  # split = face cam on top, gameplay below | crop = fill screen | blur = full frame on blurred bg
+  layout: auto
+  # Manual face cam box in source pixels [x, y, width, height]. Forces "split" with exactly
+  # this box. Leave null to auto-detect. (Find values in output/<video>/layout.json.)
+  facecam: null
   video_encoder: h264_nvenc  # RTX 5070 hardware encoder; "libx264" = CPU fallback
   quality: 23             # lower = better quality, bigger files (18-26 is sensible)
   max_mbps: 10            # bitrate cap; Shorts/TikTok/Reels don't benefit from more
@@ -49,4 +54,7 @@ captions:
   highlight_color: "#FFE600"  # color of the word being spoken
   max_words: 3            # words on screen at once
   max_chars: 16           # ...or fewer, if the words are long (keeps one line at font_size 100)
-  margin_bottom: 470      # distance from the bottom edge (470 = just below the gameplay in "blur")
+  margin_bottom:          # distance from the bottom edge, per layout
+    blur: 470             # just below the gameplay
+    crop: 470             # lower third
+    split: 1310           # bottom of the face cam panel (clear of the game's HUD bar)

@@ -34,7 +34,8 @@ def main() -> int:
     p = sub.add_parser("clipper", help="Everything in one go: (download) -> transcribe -> pick -> render")
     p.add_argument("source", help="A YouTube/web link, or a video file")
     p.add_argument("-n", "--max-clips", type=int, help="How many clips (default: from config)")
-    p.add_argument("--layout", choices=["crop", "blur"], help="crop = fill screen, blur = full frame on blurred bg")
+    p.add_argument("--layout", choices=["auto", "split", "crop", "blur"],
+                   help="auto (default) decides per video; split = face cam on top; crop = fill; blur = full frame")
     p.add_argument("--captions", action=argparse.BooleanOptionalAction, default=None,
                    help="Burn in captions (default: from config). Use --no-captions to skip.")
     p.add_argument("--redo", action="append", choices=["transcribe", "pick"], default=[],
@@ -52,7 +53,8 @@ def main() -> int:
 
     p = sub.add_parser("render", help="Cut the picked clips into vertical 9:16 MP4s")
     p.add_argument("source", type=Path, help="The original video (already transcribed and picked)")
-    p.add_argument("--layout", choices=["crop", "blur"], help="crop = fill screen, blur = full frame on blurred bg")
+    p.add_argument("--layout", choices=["auto", "split", "crop", "blur"],
+                   help="auto (default) decides per video; split = face cam on top; crop = fill; blur = full frame")
     p.add_argument("--only", help="Only these clip ranks, e.g. 1,3,5")
     p.add_argument("--captions", action=argparse.BooleanOptionalAction, default=None,
                    help="Burn in captions (default: from config). Use --no-captions to skip.")

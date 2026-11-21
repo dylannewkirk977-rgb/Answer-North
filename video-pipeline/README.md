@@ -26,7 +26,7 @@ uv run korvellan-video clipper "input\video.mp4"                       # ...or a
 Runs download (for links) → transcribe → pick → render. Clips land in `output/<video name>/clips/`. Steps that already finished are reused, so re-running only re-renders. Options:
 
 - `-n 5`: number of clips (re-picks if given)
-- `--layout crop`: fill the screen instead of the default `blur`
+- `--layout split|crop|blur`: force a layout instead of `auto`
 - `--no-captions`: skip captions
 - `--redo pick` / `--redo transcribe`: force a step to run again (e.g. fresh picks)
 
@@ -42,7 +42,17 @@ uv run korvellan-video render "input\video.mp4"        # or --only 1,3 --layout 
 - **download**: saves to `input/` as `<title>.mp4`, up to 1080p (`download.max_height`).
 - **transcribe**: writes `output/<video name>/transcript.json` with word-level timestamps. The first run downloads the Whisper model (~1.6 GB for `large-v3-turbo`).
 - **pick**: the local AI (Ollama) reads the transcript and writes `clips.json`: the best 20–60 s moments, ranked, with title, hook, and reason. ~2.5 min for a 48-min video.
-- **render**: cuts each pick into a 1080×1920 MP4 in `clips/`, encoded on the RTX 5070 (~10 s per clip). Word-by-word captions (spoken word highlighted) are burned in during the same encode; style them in the `captions:` section of `config.yaml`. Each clip's `.ass` caption file is saved next to it and can be hand-edited (e.g. in Aegisub) and re-rendered. Layouts: `blur` (full frame over a blurred background; keeps face cams and HUD, the default) or `crop` (center slice; fills the screen, cuts the sides).
+- **render**: cuts each pick into a 1080×1920 MP4 in `clips/`, encoded on the RTX 5070 (~10 s per clip). Word-by-word captions (spoken word highlighted) are burned in during the same encode; style them in the `captions:` section of `config.yaml`. Each clip's `.ass` caption file is saved next to it and can be hand-edited (e.g. in Aegisub) and re-rendered.
+
+**Layouts.** The default `auto` checks 15 frames of each video with a face detector (~3 s, CPU) and picks:
+
+| Detected | Layout | Result |
+|---|---|---|
+| One small face in a fixed spot, toward a side (streamer face cam) | `split` | Face cam enlarged on top third, gameplay below |
+| One main person on camera | `crop` | Vertical slice centered on their face |
+| Several people (1.5+ faces/frame) or no consistent face | `blur` | Full frame over a blurred background |
+
+The decision and the numbers behind it are saved to `output/<video>/layout.json`. If detection gets a face cam wrong, set `render.facecam: [x, y, width, height]` (source pixels) in `config.yaml` to force `split` with that exact box. Caption height is set per layout (`captions.margin_bottom`).
 
 How picking works: the transcript is read in 5-minute overlapping chunks, and the AI suggests up to 3 clips per chunk. Code snaps them to whole sentences, enforces length limits, and removes duplicates. A final pass shows the AI all candidates together and it chooses the top N in order. Tune it in the `clipper:` section of `config.yaml` (add `style_notes` to describe a channel).
 
@@ -61,14 +71,17 @@ src/korvellan_video/
   stages/download.py      yt-dlp download
   stages/transcribe.py    Whisper transcription
   stages/pick_moments.py  AI clip picking
+  stages/layout.py        auto layout choice (face detection)
   stages/render.py        cut + 9:16 layout + GPU encode
   stages/captions.py      word-by-word .ass captions
   recipes/clipper.py      download → transcribe → pick → render
+models/                   YuNet face detector (230 KB, MIT license)
 input/                    source videos (not committed)
 output/                   results (not committed)
 ```
 
 ## Notes
+- **Fully offline after setup.** Whisper loads the model from this PC only and never contacts Hugging Face; it only downloads if the model is missing. To update the model deliberately: `uv run python -c "from faster_whisper import download_model; download_model('large-v3-turbo')"`. The face detector model is committed in `models/`.
 - Each run starts with a ~10 s GPU warm-up. After that, transcription runs at roughly 30× real time on the RTX 5070.
 - Audio is decoded with ffmpeg rather than faster-whisper's built-in reader: the bundled PyAV 19 is incompatible with faster-whisper 1.2.1.
 - `nvidia-cublas-cu12` is capped below 12.9.3 because that release has no Windows build.

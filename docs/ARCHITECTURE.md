@@ -41,6 +41,7 @@ One Python project with reusable **stages**, chained into **recipes**:
 | Pick moments | Ollama `qwen3.5:9b` | 5070 now, R9700 later | ✅ Done |
 | Cut / crop / render | ffmpeg (NVENC) | RTX 5070 | ✅ Done |
 | Captions | .ass from word timestamps, burned in | ffmpeg (libass) | ✅ Done |
+| Auto layout (split/crop/blur) | OpenCV YuNet face detection | CPU | ✅ Done |
 
 ## Design rules
 - **One folder per service**, each with its own dependencies.

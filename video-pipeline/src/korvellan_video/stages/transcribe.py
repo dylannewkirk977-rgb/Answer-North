@@ -10,6 +10,23 @@ from ..gpu import setup_cuda_dlls
 from ..media import SAMPLE_RATE, load_audio
 
 
+def load_model(WhisperModel, tcfg: dict):
+    """Load the model from this PC only (no contact with Hugging Face).
+
+    Only if it has never been downloaded do we go online to fetch it. Updating
+    the model later is a deliberate step (see README), so results don't change
+    on their own.
+    """
+    kwargs = dict(device=tcfg["device"], compute_type=tcfg["compute_type"])
+    try:
+        return WhisperModel(tcfg["model"], local_files_only=True, **kwargs)
+    except Exception as e:  # not cached yet (huggingface_hub raises LocalEntryNotFoundError)
+        if "LocalEntryNotFound" not in type(e).__name__ and "local disk" not in str(e):
+            raise
+        print(f"  Model not on this PC yet; downloading '{tcfg['model']}' once (~1.6 GB for large-v3-turbo)...")
+        return WhisperModel(tcfg["model"], **kwargs)
+
+
 def transcribe(source: Path, cfg: dict) -> Path:
     source = Path(source)
     if not source.exists():
@@ -24,9 +41,8 @@ def transcribe(source: Path, cfg: dict) -> Path:
     duration = len(audio) / SAMPLE_RATE
     print(f"  {duration / 60:.1f} minutes of audio")
 
-    print(f"Loading Whisper '{tcfg['model']}' on {tcfg['device']} "
-          "(first run downloads the model)...")
-    model = WhisperModel(tcfg["model"], device=tcfg["device"], compute_type=tcfg["compute_type"])
+    print(f"Loading Whisper '{tcfg['model']}' on {tcfg['device']}...")
+    model = load_model(WhisperModel, tcfg)
 
     print("Transcribing...")
     started = time.time()

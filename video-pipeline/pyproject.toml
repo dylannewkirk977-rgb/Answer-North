@@ -10,6 +10,7 @@ dependencies = [
     "faster-whisper>=1.2.1",
     "nvidia-cublas-cu12>=12.8,<12.9.3 ; sys_platform == 'win32'",
     "nvidia-cudnn-cu12>=9,<10 ; sys_platform == 'win32'",
+    "opencv-python-headless>=5.1.0.95",
     "pyyaml>=6.0.4",
 ]
 
