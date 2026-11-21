@@ -1,0 +1,24 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Node
+node_modules/
+
+# Generated media and model files (too large for git)
+**/output/
+**/renders/
+*.safetensors
+*.gguf
+*.ckpt
+
+# OS / editor
+.DS_Store
+Thumbs.db
