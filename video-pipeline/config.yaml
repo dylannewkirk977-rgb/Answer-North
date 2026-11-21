@@ -1,0 +1,17 @@
+# Korvellan Studios video pipeline settings.
+# Model names and endpoints live here (not in code) so they can move between GPUs.
+
+# Where results go. Relative paths are relative to this folder.
+# Later this can point at the big F: drive, e.g. "F:/korvellan-output".
+output_dir: output
+
+transcribe:
+  model: large-v3-turbo   # Whisper model. "small" is faster but less accurate.
+  device: cuda            # "cuda" = RTX 5070, "cpu" = fallback
+  compute_type: float16
+  language: null          # null = auto-detect, or force one like "en"
+  hotwords: "Korvellan Studios"  # names/terms Whisper should spell correctly
+
+llm:
+  base_url: http://localhost:11434/v1   # Ollama (OpenAI-compatible)
+  model: qwen3.5:9b

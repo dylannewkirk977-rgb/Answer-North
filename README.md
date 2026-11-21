@@ -8,7 +8,7 @@ AI-powered services and business automation, built on local AI infrastructure.
 |---|---|---|
 | [prospect-finder/](prospect-finder/) | CLI that finds local businesses to pitch | Working prototype |
 | [website/](website/) | Korvellan Studios website (Vite + TypeScript) | Starter template |
-| `video-pipeline/` | Automated video production | Planned (next up) |
+| [video-pipeline/](video-pipeline/) | Automated video production (Clipper, then Faceless) | Transcription working |
 
 ## Docs
 

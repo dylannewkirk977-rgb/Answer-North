@@ -27,6 +27,20 @@
 | ffmpeg 9.1 | Installed (winget). GPU encoding via NVENC on the 5070 |
 | Docker / WSL | Not installed (not needed yet) |
 
+## Video pipeline (`video-pipeline/`)
+
+One Python project with reusable **stages**, chained into **recipes**:
+
+- **Clipper** (building first): long video → transcribe → AI picks best moments → cut → crop to 9:16 → captions → MP4s
+- **Faceless** (later): topic → AI script → voiceover → visuals → captions → MP4
+
+| Stage | Tool | Runs on | Status |
+|---|---|---|---|
+| Transcribe | faster-whisper (`large-v3-turbo`) | RTX 5070 | ✅ Done |
+| Pick moments | Ollama LLM | 5070 now, R9700 later | Next |
+| Cut / crop / render | ffmpeg (NVENC) | RTX 5070 | Planned |
+| Captions | From word timestamps | ffmpeg | Planned |
+
 ## Design rules
 - **One folder per service**, each with its own dependencies.
 - **Swappable stages**: each pipeline step (script, voice, visuals, captions, assembly) is a separate module with a clear input and output.
