@@ -7,8 +7,25 @@ from pathlib import Path
 from .config import load_config
 
 
+def transcript_for(source: Path, cfg: dict) -> Path:
+    """Accept either a transcript.json or the original video; return the transcript path."""
+    if source.suffix.lower() == ".json":
+        path = source
+    else:
+        path = cfg["output_dir"] / source.stem / "transcript.json"
+    if not path.exists():
+        raise FileNotFoundError(
+            f"{path}\n(Run `korvellan-video transcribe` on the video first.)"
+        )
+    return path
+
+
 def main() -> int:
     os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
+    # Windows terminals default to an old encoding that can't print emoji etc.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
 
     parser = argparse.ArgumentParser(prog="korvellan-video", description="Korvellan Studios video pipeline")
     parser.add_argument("--config", type=Path, help="Path to config.yaml (default: the project's)")
@@ -17,6 +34,10 @@ def main() -> int:
     p = sub.add_parser("transcribe", help="Transcribe a video/audio file with word timestamps")
     p.add_argument("source", type=Path, help="Video or audio file")
 
+    p = sub.add_parser("pick", help="Use the local AI to pick the best clip moments")
+    p.add_argument("source", type=Path, help="The video (already transcribed) or its transcript.json")
+    p.add_argument("-n", "--max-clips", type=int, help="How many clips to keep (default: from config)")
+
     args = parser.parse_args()
     cfg = load_config(args.config)
 
@@ -24,6 +45,9 @@ def main() -> int:
         if args.command == "transcribe":
             from .stages.transcribe import transcribe
             transcribe(args.source, cfg)
+        elif args.command == "pick":
+            from .stages.pick_moments import pick_moments
+            pick_moments(transcript_for(args.source, cfg), cfg, args.max_clips)
     except FileNotFoundError as e:
         print(f"Error: file not found: {e.filename or e}", file=sys.stderr)
         return 1

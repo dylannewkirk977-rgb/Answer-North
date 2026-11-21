@@ -13,5 +13,20 @@ transcribe:
   hotwords: "Korvellan Studios"  # names/terms Whisper should spell correctly
 
 llm:
-  base_url: http://localhost:11434/v1   # Ollama (OpenAI-compatible)
+  base_url: http://localhost:11434   # Ollama (native API)
   model: qwen3.5:9b
+  context_tokens: 16384   # how much text the model can read per request
+  think: false            # true = model reasons before answering (slower, sometimes better)
+  temperature: 0.3        # lower = more consistent picks
+  timeout_seconds: 600
+
+clipper:
+  min_seconds: 20         # shortest clip
+  max_seconds: 60         # longest clip
+  max_clips: 10           # how many clips to keep per video
+  min_score: 6            # drop clips the AI scores below this (1-10)
+  chunk_minutes: 5        # transcript is read in pieces this long
+  chunk_overlap_seconds: 30
+  rank_with_thinking: true  # let the AI reason during the final ranking (one request, worth it)
+  # Optional: tell the AI about the content/channel and what makes a good clip.
+  style_notes: ""

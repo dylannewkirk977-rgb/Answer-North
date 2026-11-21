@@ -38,8 +38,8 @@ One Python project with reusable **stages**, chained into **recipes**:
 | Stage | Tool | Runs on | Status |
 |---|---|---|---|
 | Transcribe | faster-whisper (`large-v3-turbo`) | RTX 5070 | ✅ Done |
-| Pick moments | Ollama LLM | 5070 now, R9700 later | Next |
-| Cut / crop / render | ffmpeg (NVENC) | RTX 5070 | Planned |
+| Pick moments | Ollama `qwen3.5:9b` | 5070 now, R9700 later | ✅ Done |
+| Cut / crop / render | ffmpeg (NVENC) | RTX 5070 | Next |
 | Captions | From word timestamps | ffmpeg | Planned |
 
 ## Design rules

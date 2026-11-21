@@ -15,10 +15,14 @@ Local AI environment, then an automated video production pipeline.
 
 - **2026-11-21**: Installed yt-dlp for test footage; added `video-pipeline/input/` (gitignored) for source videos.
 
+- **2026-11-21**: Transcribed a real 48-min gaming video: 92% avg word confidence, ~3 min.
+- **2026-11-21**: Built the **pick** stage: local LLM (qwen3.5:9b) picks and ranks the top 10 clips (20–60 s) → `clips.json`. ~2.5 min for a 48-min video.
+
 ## Next
-1. Run transcription on a real long video (the user is downloading one).
-2. Moment picker: the local LLM reads the transcript and picks the best 30–60 s clips.
-3. Cut + crop to 9:16 + burned-in captions → vertical MP4s.
+1. Render stage: cut each clip, crop to 9:16, encode on the GPU → vertical MP4s.
+2. Captions: burned-in, word-by-word, from the word timestamps.
+3. `clipper` recipe: one command runs transcribe → pick → render.
+4. Later: loudness detection to catch non-verbal moments (screams, big plays) in gaming content.
 
 ## Waiting on
 - **Radeon AI PRO R9700**: needs an 8-pin adapter for clearance before install. After install: AMD driver, verify detection, move LLM work onto it.
