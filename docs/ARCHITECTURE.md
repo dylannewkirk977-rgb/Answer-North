@@ -24,7 +24,7 @@
 | uv (Python 3.13, 3.15) | Installed |
 | Node 26, git, VS Code | Installed |
 | opencode | Configured for local Ollama (`opencode.json`) |
-| ffmpeg | Not installed (needed for video) |
+| ffmpeg 9.1 | Installed (winget). GPU encoding via NVENC on the 5070 |
 | Docker / WSL | Not installed (not needed yet) |
 
 ## Design rules
