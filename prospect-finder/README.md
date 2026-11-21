@@ -37,9 +37,11 @@ Review the list by hand: search results include some poor fits (e.g. corporate c
 ## Find local businesses
 
 ```powershell
-uv run main.py search --city "Stillwater, MN" --industry plumber
-uv run main.py search --city "Minneapolis, MN" --industry dentist --radius-km 10
+uv run main.py search --industry plumber                     # whole Twin Cities metro (default)
+uv run main.py search --industry dentist --city "Minneapolis, MN" --city "St Paul, MN"
 ```
+
+By default it searches the **Minneapolis–St. Paul metro** (7 counties: Hennepin, Ramsey, Dakota, Anoka, Washington, Scott, Carver). Use `--city` (repeatable, with `--radius-km`, default 10) to narrow it down. Results are sorted by city; the first 40 are printed (`--show-all` for everything) and all are saved to the CSV with a `city` column.
 
 Industries with presets: plumber, hvac, electrician, contractor, roofer, landscaper, painter, dentist, salon, auto_repair, lawyer, real_estate. Any other word searches business names.
 
