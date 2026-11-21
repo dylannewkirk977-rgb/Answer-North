@@ -41,7 +41,7 @@ uv run korvellan-video render "input\video.mp4"                  # all picked cl
 uv run korvellan-video render "input\video.mp4" --only 1,3 --layout crop
 ```
 
-Cuts each pick into a 1080×1920 MP4 in `output/<video name>/clips/`, encoded on the RTX 5070 (~10 s per clip). Layouts: `blur` (full frame over a blurred background; keeps face cams and HUD, the default) or `crop` (center slice; fills the screen, cuts the sides).
+Cuts each pick into a 1080×1920 MP4 in `output/<video name>/clips/`, encoded on the RTX 5070 (~10 s per clip). Word-by-word captions (spoken word highlighted) are burned in during the same encode; style them in the `captions:` section of `config.yaml`, or skip with `--no-captions`. Each clip's `.ass` caption file is saved next to it and can be hand-edited (e.g. in Aegisub) and re-rendered. Layouts: `blur` (full frame over a blurred background; keeps face cams and HUD, the default) or `crop` (center slice; fills the screen, cuts the sides).
 
 How picking works: the transcript is read in 5-minute overlapping chunks, and the AI suggests up to 3 clips per chunk. Code snaps them to whole sentences, enforces length limits, and removes duplicates. A final pass shows the AI all candidates together and it chooses the top N in order. Tune it in the `clipper:` section of `config.yaml` (add `style_notes` to describe a channel).
 
@@ -60,6 +60,7 @@ src/korvellan_video/
   stages/transcribe.py    Whisper transcription
   stages/pick_moments.py  AI clip picking
   stages/render.py        cut + 9:16 layout + GPU encode
+  stages/captions.py      word-by-word .ass captions
 output/                   results (not committed)
 ```
 

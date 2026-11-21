@@ -21,9 +21,10 @@ Local AI environment, then an automated video production pipeline.
 - **2026-11-21**: Built the **render** stage: picks → 1080×1920 MP4s on NVENC (~10 s/clip, ~10 Mbps). Layouts: `blur` and `crop`. Rendered all 10 test clips.
 - **Feedback on the test video:** timestamps were decent, but the source itself is low-energy. Need a livelier Creative Commons podcast/interview for the next test.
 
+- **2026-11-21**: User chose the `blur` layout. Built **captions**: word-by-word, spoken word highlighted yellow, burned in during render. Tested on clip #10.
+
 ## Next
-1. Captions: burned-in, word-by-word, from the word timestamps.
-2. `clipper` recipe: one command runs transcribe → pick → render.
+1. `clipper` recipe: one command runs transcribe → pick → render.
 3. Test on a livelier Creative Commons podcast/interview.
 4. Later: `split` layout (face cam on top, gameplay below) for streamer content.
 5. Later: loudness detection to catch non-verbal moments (screams, big plays) in gaming content.

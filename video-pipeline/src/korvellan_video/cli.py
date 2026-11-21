@@ -42,6 +42,8 @@ def main() -> int:
     p.add_argument("source", type=Path, help="The original video (already transcribed and picked)")
     p.add_argument("--layout", choices=["crop", "blur"], help="crop = fill screen, blur = full frame on blurred bg")
     p.add_argument("--only", help="Only these clip ranks, e.g. 1,3,5")
+    p.add_argument("--captions", action=argparse.BooleanOptionalAction, default=None,
+                   help="Burn in captions (default: from config). Use --no-captions to skip.")
 
     args = parser.parse_args()
     cfg = load_config(args.config)
@@ -59,7 +61,7 @@ def main() -> int:
             if not clips_path.exists():
                 raise FileNotFoundError(f"{clips_path}\n(Run `korvellan-video pick` on the video first.)")
             only = [int(x) for x in args.only.split(",")] if args.only else None
-            render(args.source, clips_path, cfg, args.layout, only)
+            render(args.source, clips_path, cfg, args.layout, only, args.captions)
     except FileNotFoundError as e:
         print(f"Error: file not found: {e.filename or e}", file=sys.stderr)
         return 1

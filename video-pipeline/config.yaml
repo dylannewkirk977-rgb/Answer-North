@@ -36,3 +36,13 @@ render:
   video_encoder: h264_nvenc  # RTX 5070 hardware encoder; "libx264" = CPU fallback
   quality: 23             # lower = better quality, bigger files (18-26 is sensible)
   max_mbps: 10            # bitrate cap; Shorts/TikTok/Reels don't benefit from more
+
+captions:
+  enabled: true
+  font: Arial Black       # any installed Windows font
+  font_size: 84
+  outline: 7              # black outline thickness
+  highlight_color: "#FFE600"  # color of the word being spoken
+  max_words: 3            # words on screen at once
+  max_chars: 18           # ...or fewer, if the words are long
+  margin_bottom: 470      # distance from the bottom edge (470 = just below the gameplay in "blur")
