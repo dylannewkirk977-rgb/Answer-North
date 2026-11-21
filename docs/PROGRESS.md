@@ -38,7 +38,10 @@ Video pipeline: the **Clipper** (long video → captioned vertical clips) works 
 5. Later: optional caption censoring.
 
 ## Waiting on
-- **Radeon AI PRO R9700**: needs an 8-pin adapter for clearance before install. After install: AMD driver, verify detection, move LLM work onto it.
+- **Radeon AI PRO R9700**: needs an 8-pin adapter for clearance before install. After install:
+  1. AMD driver, verify detection.
+  2. Ollama on the R9700 only (hide the NVIDIA card from it); pull a ~30B model; switch `llm.model` in `video-pipeline/config.yaml`; compare picks against the 9B model.
+  3. **Build the agent console** (`console/`, approved for after the install): chat in plain English, local LLM calls the existing tools (creators, search, download, clipper, open folder, outreach drafts). Phases: terminal chat → background jobs + progress → local web UI with clip previews. Tools allowlisted, no deletes, F: blocked in code, confirm before long jobs.
 
 ## Known issues
 - **prospect-finder `search`**: depends on free public OpenStreetMap servers, which were overloaded on 2026-11-21 (untested end-to-end). OSM data is also incomplete for small businesses. A paid source (e.g. Google Places API) would be far more reliable if local leads become important.
